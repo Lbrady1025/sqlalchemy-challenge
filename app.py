@@ -13,3 +13,9 @@ Base = automap_base()
 
 Base.prepare(engine, reflect=True)
 
+app = Flask(__name__)
+
+@app.route('/')
+def welcome():
+    return(f"Welcome to the Hawaii Weather API!</br>"
+            f"Available routes: </br>")
