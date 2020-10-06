@@ -97,14 +97,23 @@ def start(start):
     session = Session(engine)
     
     results = session.query(measurement.date)
-
+    
     start_date = date.replace(" ", "")
     for date in results:
         search_term = results["date"].replace(" ", "")
 
-        if search_term == start_date:
+        temp_min = session.query(func.min(measurement.tobs)).\
+            filter(measurement.date >= search_term).all()
+        temp_max = session.query(func.max(measurement.tobs)).\
+            filter(measurement.date >= search_term).all()
+        temp_avg = session.query(func.avg(measurement.tobs)).\
+            filter(measurement.date >= search_term).all()
+
+        if search_term == start_date:        
             return jsonify(date)
 
     return jsonify({"error": "Date not found."}), 404
+
+
 # if __name__ == '__main__':
 #     app.run(debug=True)
