@@ -7,6 +7,8 @@ from sqlalchemy import create_engine, func
 
 from flask import Flask, jsonify
 
+import datetime as dt
+
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 Base = automap_base()
@@ -14,6 +16,7 @@ Base = automap_base()
 Base.prepare(engine, reflect=True)
 
 measurement = Base.classes.measurement
+
 station = Base.classes.station
 
 app = Flask(__name__)
@@ -21,7 +24,12 @@ app = Flask(__name__)
 @app.route('/')
 def welcome():
     return(f"Welcome to the Hawaii Weather API!</br>"
-        f"Available routes: </br>")
+        f"Available routes: </br>"
+        f"/api/v1.0/precipitation </br>"
+        f"/api/v1.0/stations </br>"
+        f"/api/v1.0/tobs </br>"
+        f"/api/v1.0/<start> </br>"
+        f"/api/v1.0/<start>/<end> </br>")
 
 @app.route('/api/v1.0/precipitation')
 def precipitation():
@@ -46,21 +54,57 @@ def stations():
 
     session = Session(engine)
 
-    results = session.query(measurement.station).group_by(measurement.station)
+    results = session.query(station.name).group_by(station.station)
+
+    session.close()
 
     all_stations = []
 
-    for station in results:
+    for name in results:
         stations_dict = {}
-        stations_dict['station'] = station
+        stations_dict['name'] = name
         all_stations.append(stations_dict)
     
     return jsonify(all_stations)
 
-# @app.route('/api/v1.0/tobs')
-# def temps():
+@app.route('/api/v1.0/tobs')
+def temps():
 
+    session = Session(engine)
 
+    session.query(measurement.date).order_by(measurement.date.desc()).first()
+    year_ago = dt.date(2017,8,23) - dt.timedelta(days=365)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    results = session.query(measurement.date,measurement.prcp).\
+        filter(measurement.date >= year_ago).\
+        filter(measurement.station == 'USC00519281').all()
+
+    session.close()
+
+    all_year_temps = []
+
+    for date,prcp in results:
+        temp_dict = {}
+        temp_dict['date'] = date
+        temp_dict['prcp'] = prcp
+        all_year_temps.append(temp_dict)
+    
+    return jsonify(all_year_temps)
+
+@app.route('/api/v1.0/<start>')
+def start(start):
+    
+    session = Session(engine)
+    
+    results = session.query(measurement.date)
+
+    start_date = date.replace(" ", "")
+    for date in results:
+        search_term = results["date"].replace(" ", "")
+
+        if search_term == start_date:
+            return jsonify(date)
+
+    return jsonify({"error": "Date not found."}), 404
+# if __name__ == '__main__':
+#     app.run(debug=True)
