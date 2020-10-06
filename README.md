@@ -1,6 +1,6 @@
 # sqlalchemy-challenge
 
-##CWRU Bootcamp Homework Week 10##
+## CWRU Bootcamp Homework Week 10 
 
 This assignment involved using SQLAlchemy to query a SQLite database of weather data from Hawaii. First, using a [Jupyter Notebook](climate_starter.ipynb), the tables from the database were reflected into the SQLAlchemy ORM. From there, an exploratory analysis was performed of the precipitation at all of the included stations for the past year. Below is a bar chart describing this data:
 
