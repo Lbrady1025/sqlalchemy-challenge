@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, func
 
 from flask import Flask, jsonify
 
-engine = create_engine("sqlite:///hawaii.sqlite")
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 Base = automap_base()
 
@@ -21,15 +21,37 @@ app = Flask(__name__)
 @app.route('/')
 def welcome():
     return(f"Welcome to the Hawaii Weather API!</br>"
-            f"Available routes: </br>")
+        f"Available routes: </br>")
 
 @app.route('/api/v1.0/precipitation')
 def precipitation():
+    session = Session(engine)
+    
+    results = session.query(measurement.date,measurement.prcp).all()
+    
+    session.close()
+
+    all_precip = []
+
+    for date,prcp in results:
+        precip_dict = {}
+        precip_dict['date'] = date
+        precip_dict['prcp'] = prcp
+        all_precip.append(precip_dict)
+    
+    return jsonify(all_precip)
+
+# @app.route('/api/v1.0/stations')
+# def stations():
+
+#     session = Session(engine)
+
+#     results = session.query()
+
+# @app.route('/api/v1.0/tobs')
+# def temps():
 
 
-@app.route('/api/v1.0/stations')
-def stations():
 
-
-@app.route('/api/v1.0/tobs')
-def temps():
+if __name__ == '__main__':
+    app.run(debug=True)
